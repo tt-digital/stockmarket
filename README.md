@@ -1,4 +1,4 @@
-# stockmarket
+# stock market
 Useful snippets of code for acquiring and analyzing stock market data.
 
 ## ticker.py
