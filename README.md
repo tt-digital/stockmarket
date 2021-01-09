@@ -23,7 +23,7 @@ Data queries will be made to https://finance.yahoo.com/.
 
 ### What it does:
 
-Fetches historical stock market data through yfinance (https://pypi.org/project/yfinance/) and plots them including moving average and traded volume. Also saves a csv with the data in the same folder as the script.
+Fetches historical stock market data through yfinance (https://pypi.org/project/yfinance/) and plots them utilizing mplfinance (https://pypi.org/project/mplfinance/) including moving average and traded volume. Also saves a csv with the data in the same folder as the script.
 
 ### Output
 
