@@ -17,3 +17,14 @@ $ python ticker.py BHG.ST AAPL GOOG EURUSD=X ^GDAXI 1810.HK
 ### Data Source:
 
 Data queries will be made to https://finance.yahoo.com/.
+
+
+## history.py
+
+### What it does:
+
+Fetches historical stock market data through yfinance and plots them including moving average and traded volume. Also saves a csv with the data in the same folder as the script.
+
+### Output
+
+![alt text](history.png "history.py")
