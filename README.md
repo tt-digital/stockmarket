@@ -27,7 +27,7 @@ Fetches historical stock market data through yfinance (https://pypi.org/project/
 
 ### Usage:
 
-Edit variables in the file to your liking and run simply run the script: 
+Edit variables in the file to your liking and simply run the script: 
 ```
 $ python3.8 history.py
 ```
