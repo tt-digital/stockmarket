@@ -1,0 +1,6 @@
+click
+sty
+tabulate
+yfinance
+pandas
+mplfinance
