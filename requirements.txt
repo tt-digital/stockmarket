@@ -1,7 +1,10 @@
+# ticker.py
 click
 requests
 sty
 tabulate
+
+# history.py
 urllib3<2
 yfinance
 pandas
