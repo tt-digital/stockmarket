@@ -2,6 +2,7 @@ click
 requests
 sty
 tabulate
+urllib3<2
 yfinance
 pandas
 mplfinance

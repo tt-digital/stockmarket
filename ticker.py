@@ -4,14 +4,38 @@ from sty import fg
 from tabulate import tabulate
 
 
-def fetch_quotes(symbols):
-    url = "https://query1.finance.yahoo.com/v7/finance/quote"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-        "Accept": "application/json",
-    }
-    params = {"symbols": ",".join(symbols)}
-    resp = requests.get(url, headers=headers, params=params, timeout=10)
+def make_session():
+    """Open a session with Yahoo Finance to obtain the required cookies."""
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    })
+    session.get("https://finance.yahoo.com", timeout=10)
+    return session
+
+
+def get_crumb(session):
+    """Fetch the crumb token Yahoo requires alongside cookie auth."""
+    resp = session.get(
+        "https://query1.finance.yahoo.com/v1/test/getcrumb",
+        timeout=10,
+    )
+    resp.raise_for_status()
+    return resp.text.strip()
+
+
+def fetch_quotes(symbols, session, crumb):
+    resp = session.get(
+        "https://query1.finance.yahoo.com/v7/finance/quote",
+        params={"symbols": ",".join(symbols), "crumb": crumb},
+        timeout=10,
+    )
     resp.raise_for_status()
     return {r["symbol"]: r for r in resp.json()["quoteResponse"]["result"]}
 
@@ -24,7 +48,9 @@ def ticker(symbols):
         return
 
     try:
-        quotes = fetch_quotes(symbols)
+        session = make_session()
+        crumb   = get_crumb(session)
+        quotes  = fetch_quotes(symbols, session, crumb)
     except requests.RequestException as e:
         click.echo(f"Network error: {e}", err=True)
         return
