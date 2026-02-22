@@ -1,37 +1,52 @@
-# stock market
-Useful snippets of code for acquiring and analyzing stock market data.
+# ticker.py
 
-## ticker.py
+CLI tool for live stock quotes. Displays current price, daily high/low, change, and percent change for one or more symbols.
 
-### Usage:
+## Setup
 
-Put the stock market symbols as arguments for ticker.py in the command line.
-```
-$ python3.8 ticker.py BHG.ST AAPL GOOG EURUSD=X ^GDAXI 1810.HK
-```
+**1. Get a free API key**
 
-### Sample Output:
+Register at https://finnhub.io/register — no credit card required.
 
-![alt text](ticker.png "ticker.py")
+**2. Set the key as an environment variable**
 
-### Data Source:
-
-Data queries will be made to https://finance.yahoo.com/.
-
-
-## history.py
-
-### What it does:
-
-Fetches historical stock market data through yfinance (https://pypi.org/project/yfinance/) and plots them utilizing mplfinance (https://pypi.org/project/mplfinance/) including moving average and traded volume. Also saves a csv with the data in the same folder as the script.
-
-### Usage:
-
-Edit variables in the file to your liking and simply run the script: 
-```
-$ python3.8 history.py
+```bash
+export FINNHUB_KEY=your_key_here
 ```
 
-### Sample Output:
+Add it to your `~/.zshrc` or `~/.bashrc` to make it permanent.
 
-![alt text](history.png "history.py")
+**3. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+```bash
+python3 ticker.py SYMBOL...
+```
+
+Pass one or more ticker symbols as arguments.
+
+```bash
+python3 ticker.py AAPL GOOG MSFT TSLA
+```
+
+For forex, use Finnhub's `OANDA:` prefix:
+
+```bash
+python3 ticker.py OANDA:EUR_USD OANDA:GBP_USD
+```
+
+## Output
+
+```
+| SYM  | PRICE  | HIGH   | LOW    | CHG    | %       |
+|------|--------|--------|--------|--------|---------|
+| AAPL | 189.30 | 190.45 | 188.12 | ▲ +1.20 | +0.64% |
+| GOOG | 175.82 | 176.90 | 174.33 | ▼ -0.55 | -0.31% |
+```
+
+Gains are shown in green, losses in red, with ▲/▼ indicators.
