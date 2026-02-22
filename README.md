@@ -34,12 +34,6 @@ Pass one or more ticker symbols as arguments.
 python3 ticker.py AAPL GOOG MSFT TSLA
 ```
 
-For forex, use Finnhub's `OANDA:` prefix:
-
-```bash
-python3 ticker.py OANDA:EUR_USD OANDA:GBP_USD
-```
-
 ## Output
 
 ```
