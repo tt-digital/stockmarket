@@ -332,7 +332,15 @@ def generate_pdf(command, plain):
     filename = f"scan-{today}-{command}.pdf"
 
     # Replace characters outside Latin-1 (Courier is not Unicode)
-    safe = plain.replace("↓", "v").replace("—", "-")
+    safe = (plain
+        .replace("↓", "v")
+        .replace("—",  "-")
+        .replace("–",  "-")
+        .replace("…",  "...")
+        .replace("\u2018", "'").replace("\u2019", "'")
+        .replace("\u201c", '"').replace("\u201d", '"')
+        .encode("latin-1", errors="replace").decode("latin-1")
+    )
 
     pdf = FPDF(orientation="L", unit="mm", format="A4")
     pdf.set_margins(14, 14, 14)
