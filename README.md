@@ -95,22 +95,15 @@ ISIN and WKN are hardcoded for all watchlist stocks and shown in every table. Ea
 
 ---
 
-## Email reports
+## PDF reports
 
-Add `--email ADDRESS` to any command to receive the report as a plain-text email:
-
-```bash
-python3 scan.py all --email you@example.com
-python3 scan.py conviction --email you@example.com
-```
-
-Set SMTP credentials once in your shell config:
+Add `--pdf` to any command to save the report as a minimalistic PDF:
 
 ```bash
-export SMTP_USER=you@gmail.com
-export SMTP_PASS=your_app_password   # Gmail: Account → Security → App Passwords
-export SMTP_HOST=smtp.gmail.com      # optional, default
-export SMTP_PORT=587                 # optional, default
+python3 scan.py all --pdf
+python3 scan.py conviction --pdf
 ```
 
-The report is sent as plain text with ANSI colors stripped. The terminal output is unchanged.
+Saves `scan-YYYY-MM-DD-COMMAND.pdf` in the current directory. No credentials or external services needed — requires `fpdf2` (included in `requirements.txt`).
+
+The terminal output is unchanged; the PDF is generated in addition.

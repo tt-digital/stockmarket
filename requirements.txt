@@ -1,4 +1,5 @@
 click
+fpdf2
 requests
 sty
 tabulate

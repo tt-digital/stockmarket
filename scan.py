@@ -15,10 +15,8 @@ import contextlib
 import io
 import os
 import re
-import smtplib
 import time
 from datetime import date, timedelta
-from email.mime.text import MIMEText
 
 import click
 import requests
@@ -316,40 +314,45 @@ def run_conviction(key):
     print_table(headers, rows, "analyst conviction  (top 10)")
 
 
-# ── Email ─────────────────────────────────────────────────────────────────────
+# ── PDF report ────────────────────────────────────────────────────────────────
 def strip_ansi(text):
     return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
-def send_email(to_addr, subject, body):
-    host   = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-    port   = int(os.environ.get("SMTP_PORT", "587"))
-    user   = os.environ.get("SMTP_USER", "")
-    passwd = os.environ.get("SMTP_PASS", "")
-    sender = os.environ.get("SMTP_FROM", user)
+def generate_pdf(command, plain):
+    from fpdf import FPDF  # lazy import — only needed with --pdf
 
-    if not user or not passwd:
-        raise click.ClickException(
-            "SMTP credentials not set.\n"
-            "  export SMTP_USER=you@gmail.com\n"
-            "  export SMTP_PASS=your_app_password\n"
-            "  export SMTP_HOST=smtp.gmail.com   (optional, default)\n"
-            "  export SMTP_PORT=587               (optional, default)"
-        )
+    today    = date.today().isoformat()
+    filename = f"scan-{today}-{command}.pdf"
 
-    msg = MIMEText(body, "plain", "utf-8")
-    msg["Subject"] = subject
-    msg["From"]    = sender
-    msg["To"]      = to_addr
+    # Replace characters outside Latin-1 (Courier is not Unicode)
+    safe = plain.replace("↓", "v").replace("—", "-")
 
-    try:
-        with smtplib.SMTP(host, port) as smtp:
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.login(user, passwd)
-            smtp.send_message(msg)
-    except smtplib.SMTPException as exc:
-        raise click.ClickException(f"SMTP error: {exc}")
+    pdf = FPDF(orientation="L", unit="mm", format="A4")
+    pdf.set_margins(14, 14, 14)
+    pdf.set_auto_page_break(True, margin=14)
+    pdf.add_page()
+
+    # Header bar
+    pdf.set_font("Courier", "B", 11)
+    pdf.set_fill_color(28, 28, 28)
+    pdf.set_text_color(240, 240, 240)
+    pdf.cell(0, 9, f"  stock scan / {command}  .  {today}", fill=True,
+             new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(5)
+
+    # Body — line by line; section titles (// ...) in grey
+    for line in safe.splitlines():
+        if line.strip().startswith("//"):
+            pdf.set_text_color(130, 130, 130)
+            pdf.set_font("Courier", "B", 8)
+        else:
+            pdf.set_text_color(30, 30, 30)
+            pdf.set_font("Courier", "", 8)
+        pdf.cell(0, 4.2, line, new_x="LMARGIN", new_y="NEXT")
+
+    pdf.output(filename)
+    return filename
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
@@ -360,14 +363,12 @@ def send_email(to_addr, subject, body):
     "  movers      Top 5 gainers and losers from watchlist\n\n"
     "  conviction  Analyst buy-rating × 52W discount (top 10)\n\n"
     "  all         Run all three\n\n"
-    "Requires:  export FINNHUB_KEY=your_key\n\n"
-    "Email:     export SMTP_USER=you@gmail.com\n"
-    "           export SMTP_PASS=your_app_password"
+    "Requires:  export FINNHUB_KEY=your_key"
 ))
 @click.argument("command", type=click.Choice(["earnings", "movers", "conviction", "all"]))
-@click.option("--email", "email_to", default=None, metavar="ADDRESS",
-              help="Send the report to this address (needs SMTP_USER / SMTP_PASS).")
-def scan(command, email_to):
+@click.option("--pdf", "make_pdf", is_flag=True,
+              help="Save the report as scan-YYYY-MM-DD-COMMAND.pdf (requires fpdf2).")
+def scan(command, make_pdf):
     key = get_key()
 
     def _run():
@@ -378,22 +379,19 @@ def scan(command, email_to):
         if command in ("conviction", "all"):
             run_conviction(key)
 
-    if not email_to:
+    if not make_pdf:
         _run()
         return
 
-    # Capture output, echo it with colors, then send plain-text email
+    # Capture output, echo it with colors, then write PDF
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         _run()
     captured = buf.getvalue()
     click.echo(captured, nl=False)
 
-    plain   = strip_ansi(captured)
-    header  = f"Stock Scan — {command}  ·  {date.today().isoformat()}\n" + "=" * 56 + "\n"
-    subject = f"Stock Scan ({command}) — {date.today().isoformat()}"
-    send_email(email_to, subject, header + plain)
-    click.echo(f"\n  report sent → {email_to}")
+    filename = generate_pdf(command, strip_ansi(captured))
+    click.echo(f"\n  saved → {filename}")
 
 
 if __name__ == "__main__":
