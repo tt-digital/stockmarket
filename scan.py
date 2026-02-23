@@ -11,9 +11,14 @@ ISIN + WKN are hardcoded for all 63 watchlist stocks; earnings symbols
 outside the watchlist show '—'.
 """
 
+import contextlib
+import io
 import os
+import re
+import smtplib
 import time
 from datetime import date, timedelta
+from email.mime.text import MIMEText
 
 import click
 import requests
@@ -311,6 +316,42 @@ def run_conviction(key):
     print_table(headers, rows, "analyst conviction  (top 10)")
 
 
+# ── Email ─────────────────────────────────────────────────────────────────────
+def strip_ansi(text):
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
+
+def send_email(to_addr, subject, body):
+    host   = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    port   = int(os.environ.get("SMTP_PORT", "587"))
+    user   = os.environ.get("SMTP_USER", "")
+    passwd = os.environ.get("SMTP_PASS", "")
+    sender = os.environ.get("SMTP_FROM", user)
+
+    if not user or not passwd:
+        raise click.ClickException(
+            "SMTP credentials not set.\n"
+            "  export SMTP_USER=you@gmail.com\n"
+            "  export SMTP_PASS=your_app_password\n"
+            "  export SMTP_HOST=smtp.gmail.com   (optional, default)\n"
+            "  export SMTP_PORT=587               (optional, default)"
+        )
+
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = subject
+    msg["From"]    = sender
+    msg["To"]      = to_addr
+
+    try:
+        with smtplib.SMTP(host, port) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(user, passwd)
+            smtp.send_message(msg)
+    except smtplib.SMTPException as exc:
+        raise click.ClickException(f"SMTP error: {exc}")
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 @click.command(help=(
     "Scan for interesting stocks using Finnhub free tier.\n\n"
@@ -319,17 +360,40 @@ def run_conviction(key):
     "  movers      Top 5 gainers and losers from watchlist\n\n"
     "  conviction  Analyst buy-rating × 52W discount (top 10)\n\n"
     "  all         Run all three\n\n"
-    "Requires:  export FINNHUB_KEY=your_key"
+    "Requires:  export FINNHUB_KEY=your_key\n\n"
+    "Email:     export SMTP_USER=you@gmail.com\n"
+    "           export SMTP_PASS=your_app_password"
 ))
 @click.argument("command", type=click.Choice(["earnings", "movers", "conviction", "all"]))
-def scan(command):
+@click.option("--email", "email_to", default=None, metavar="ADDRESS",
+              help="Send the report to this address (needs SMTP_USER / SMTP_PASS).")
+def scan(command, email_to):
     key = get_key()
-    if command in ("earnings", "all"):
-        run_earnings(key)
-    if command in ("movers", "all"):
-        run_movers(key)
-    if command in ("conviction", "all"):
-        run_conviction(key)
+
+    def _run():
+        if command in ("earnings", "all"):
+            run_earnings(key)
+        if command in ("movers", "all"):
+            run_movers(key)
+        if command in ("conviction", "all"):
+            run_conviction(key)
+
+    if not email_to:
+        _run()
+        return
+
+    # Capture output, echo it with colors, then send plain-text email
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        _run()
+    captured = buf.getvalue()
+    click.echo(captured, nl=False)
+
+    plain   = strip_ansi(captured)
+    header  = f"Stock Scan — {command}  ·  {date.today().isoformat()}\n" + "=" * 56 + "\n"
+    subject = f"Stock Scan ({command}) — {date.today().isoformat()}"
+    send_email(email_to, subject, header + plain)
+    click.echo(f"\n  report sent → {email_to}")
 
 
 if __name__ == "__main__":
