@@ -7,7 +7,7 @@ Commands:
   python scan.py conviction  Analyst buy-rating × 52W discount (top 10)
   python scan.py all         Run all three
 
-ISIN + WKN are hardcoded for all 50 watchlist stocks; earnings symbols
+ISIN + WKN are hardcoded for all 63 watchlist stocks; earnings symbols
 outside the watchlist show '—'.
 """
 
@@ -21,8 +21,9 @@ from sty import fg
 from tabulate import tabulate
 
 
-# ── Watchlist (~50 liquid S&P 100 names) ─────────────────────────────────────
+# ── Watchlist (~63 stocks: S&P 100 core + semis, intl ADRs, pharma, financials)
 WATCHLIST = [
+    # S&P 100 core
     "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "BRK.B",
     "JPM",  "V",    "UNH",  "XOM",   "LLY",  "JNJ",  "WMT",  "MA",
     "PG",   "HD",   "ORCL", "COST",  "MRK",  "ABBV", "CVX",  "BAC",
@@ -30,12 +31,20 @@ WATCHLIST = [
     "DHR",  "TXN",  "NEE",  "PM",    "AMGN", "LIN",  "RTX",  "QCOM",
     "HON",  "IBM",  "GE",   "CAT",   "SBUX", "BA",   "GS",   "MS",
     "NFLX", "AMD",
+    # Semiconductors / hardware
+    "AMAT", "MRVL", "ARM",
+    # International (ADR / cross-listed)
+    "ASML", "TSM",  "NVO",  "SAP",
+    # Pharma / biotech
+    "REGN", "ISRG", "VRTX",
+    # Financials / data
+    "BLK",  "SPGI", "MCO",
 ]
 
 FH_BASE  = "https://finnhub.io/api/v1"
 THROTTLE = 0.5   # seconds between Finnhub calls
 
-# ── ISIN / WKN static table (50 watchlist stocks) ─────────────────────────────
+# ── ISIN / WKN static table (63 watchlist stocks) ─────────────────────────────
 ISIN_WKN = {
     "AAPL":  ("US0378331005", "865985"),
     "MSFT":  ("US5949181045", "870747"),
@@ -87,6 +96,23 @@ ISIN_WKN = {
     "MS":    ("US6174464486", "885836"),
     "NFLX":  ("US64110L1061", "552484"),
     "AMD":   ("US0079031078", "863186"),
+    # Semiconductors / hardware
+    "AMAT":  ("US0382221051", "865177"),
+    "MRVL":  ("US57344Q1058", "A2QM30"),
+    "ARM":   ("GB00BN090394", "A3EX3R"),
+    # International (ADR / cross-listed)
+    "ASML":  ("NL0010273215", "A1J4U4"),
+    "TSM":   ("US8740391003", "909800"),
+    "NVO":   ("DK0062498333", "A3EU6F"),   # Novo Nordisk B share
+    "SAP":   ("DE0007164600", "716460"),
+    # Pharma / biotech
+    "REGN":  ("US75886F1075", "881535"),
+    "ISRG":  ("US46120E6023", "203810"),
+    "VRTX":  ("US92532F1003", "882807"),
+    # Financials / data
+    "BLK":   ("US09247X1019", "928193"),
+    "SPGI":  ("US78409V1044", "880585"),
+    "MCO":   ("US6153031088", "915246"),
 }
 
 
