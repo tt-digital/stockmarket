@@ -315,6 +315,12 @@ def run_conviction(key):
 
 
 # ── PDF report ────────────────────────────────────────────────────────────────
+class _TtyStringIO(io.StringIO):
+    """StringIO that claims to be a TTY so click preserves ANSI color codes."""
+    def isatty(self):
+        return True
+
+
 def strip_ansi(text):
     return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
@@ -384,7 +390,7 @@ def scan(command, make_pdf):
         return
 
     # Capture output, echo it with colors, then write PDF
-    buf = io.StringIO()
+    buf = _TtyStringIO()
     with contextlib.redirect_stdout(buf):
         _run()
     captured = buf.getvalue()
