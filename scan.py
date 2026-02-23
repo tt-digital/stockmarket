@@ -27,14 +27,14 @@ WATCHLIST = [
     "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "BRK.B",
     "JPM",  "V",    "UNH",  "XOM",   "LLY",  "JNJ",  "WMT",  "MA",
     "PG",   "HD",   "ORCL", "COST",  "MRK",  "ABBV", "CVX",  "BAC",
-    "KO",   "PEP",  "CSCO", "TMO",   "ACN",  "MCD",  "ABT",  "NKE",
+    "KO",   "PEP",  "CSCO", "TMO",   "ACN",  "MCD",  "ABT",
     "DHR",  "TXN",  "NEE",  "PM",    "AMGN", "LIN",  "RTX",  "QCOM",
-    "HON",  "IBM",  "GE",   "CAT",   "SBUX", "BA",   "GS",   "MS",
+    "HON",  "IBM",  "GE",   "CAT",   "AXP",  "OXY",  "GS",   "MS",
     "NFLX", "AMD",
     # Semiconductors / hardware
     "AMAT", "MRVL", "ARM",
     # International (ADR / cross-listed)
-    "ASML", "TSM",  "NVO",  "SAP",
+    "ASML", "TSM",  "NVO",  "SAP",  "BMWYY",
     # Pharma / biotech
     "REGN", "ISRG", "VRTX",
     # Financials / data
@@ -77,7 +77,6 @@ ISIN_WKN = {
     "ACN":   ("IE00B7BKVD75", "A0YZ78"),
     "MCD":   ("US5801351017", "856958"),
     "ABT":   ("US0028241000", "850103"),
-    "NKE":   ("US6541061031", "866993"),
     "DHR":   ("US2358511028", "866197"),
     "TXN":   ("US8825081040", "852654"),
     "NEE":   ("US65339F1012", "A0NHL8"),
@@ -90,8 +89,8 @@ ISIN_WKN = {
     "IBM":   ("US4592001014", "851399"),
     "GE":    ("US36266G1013", "A3DLAP"),
     "CAT":   ("US1491231015", "858437"),
-    "SBUX":  ("US8552441094", "884437"),
-    "BA":    ("US0970231058", "850471"),
+    "AXP":   ("US0258161092", "850226"),
+    "OXY":   ("US6745991058", "851921"),
     "GS":    ("US38141G1040", "920332"),
     "MS":    ("US6174464486", "885836"),
     "NFLX":  ("US64110L1061", "552484"),
@@ -105,6 +104,7 @@ ISIN_WKN = {
     "TSM":   ("US8740391003", "909800"),
     "NVO":   ("DK0062498333", "A3EU6F"),   # Novo Nordisk B share
     "SAP":   ("DE0007164600", "716460"),
+    "BMWYY": ("DE0005190003", "519000"),   # BMW AG (OTC ADR)
     # Pharma / biotech
     "REGN":  ("US75886F1075", "881535"),
     "ISRG":  ("US46120E6023", "203810"),
